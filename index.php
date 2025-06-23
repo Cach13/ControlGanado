@@ -50,6 +50,13 @@ $gananciaAnual = $conn->query("SELECT SUM(total_ganancia) AS total FROM ventas W
             <h5>💰 Ganancia anual: <strong>$<?= number_format($gananciaAnual, 2) ?></strong></h5>
         </div>
 
+        <!-- Botones de acción -->
+        <div class="mb-4">
+            <a href="dashboard.php" class="btn btn-primary">📊 Dashboard</a>
+            <a href="agregar_cria.php" class="btn btn-success">➕ Agregar Nueva Cría</a>
+            <a href="historial.php" class="btn btn-info">📜 Ver Historial de Ventas</a>
+        </div>
+
         <form method="GET" class="row g-2 mb-4">
             <div class="col-md-2">
                 <select name="sexo" class="form-select">
@@ -72,34 +79,54 @@ $gananciaAnual = $conn->query("SELECT SUM(total_ganancia) AS total FROM ventas W
             </div>
         </form>
 
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Arete</th>
-                    <th>Sexo</th>
-                    <th>Kg Compra</th>
-                    <th>Precio Compra</th>
-                    <th>Total Compra</th>
-                    <th>Fecha Compra</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $resultado->fetch_assoc()): ?>
-                <tr>
-                    <td>
-                        <a href="venta.php?arete=<?= $row['arete'] ?>" class="text-decoration-none">
-                            <?= $row['arete'] ?>
-                        </a>
-                    </td>
-                    <td><?= $row['sexo'] ?></td>
-                    <td><?= $row['kg_compra'] ?> kg</td>
-                    <td>$<?= number_format($row['precio_compra'], 2) ?></td>
-                    <td>$<?= number_format($row['total_compra'], 2) ?></td>
-                    <td><?= $row['fecha_compra'] ?></td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+        <?php if ($conteo > 0): ?>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Arete</th>
+                        <th>Sexo</th>
+                        <th>Kg Compra</th>
+                        <th>Precio Compra</th>
+                        <th>Total Compra</th>
+                        <th>Fecha Compra</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($row = $resultado->fetch_assoc()): ?>
+                    <tr>
+                        <td>
+                            <strong><?= $row['arete'] ?></strong>
+                        </td>
+                        <td>
+                            <?php if ($row['sexo'] == 'M'): ?>
+                                <span class="badge bg-primary">🐂 Macho</span>
+                            <?php else: ?>
+                                <span class="badge bg-pink" style="background-color: #e91e63;">🐄 Hembra</span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= $row['kg_compra'] ?> kg</td>
+                        <td>$<?= number_format($row['precio_compra'], 2) ?></td>
+                        <td><strong>$<?= number_format($row['total_compra'], 2) ?></strong></td>
+                        <td><?= date('d/m/Y', strtotime($row['fecha_compra'])) ?></td>
+                        <td>
+                            <a href="venta.php?arete=<?= $row['arete'] ?>" class="btn btn-sm btn-success">
+                                💰 Vender
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php else: ?>
+        <div class="alert alert-info text-center">
+            <h4>🐮 No hay crías registradas</h4>
+            <p>Comienza agregando tu primera cría al sistema</p>
+            <a href="agregar_cria.php" class="btn btn-success">➕ Agregar Primera Cría</a>
+        </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>
