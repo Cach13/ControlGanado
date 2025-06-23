@@ -115,86 +115,327 @@ while($row = $edadResult->fetch_assoc()) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Control de Ganado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
             color: white;
             border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: transform 0.3s;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
+
         .stat-number {
-            font-size: 2.5rem;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
             font-weight: bold;
+            margin-bottom: 0.5rem;
         }
+
+        .stat-label {
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            opacity: 0.9;
+        }
+
         .chart-container {
             position: relative;
-            height: 400px;
-            margin-bottom: 30px;
+            height: 300px;
+            margin-bottom: 1.5rem;
         }
+
         .dashboard-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background: var(--secondary-gradient);
             color: white;
-            padding: 30px 0;
-            margin-bottom: 30px;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
             border-radius: 10px;
+            text-align: center;
         }
+
+        .dashboard-header h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+        }
+
+        .nav-pills {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-pills .nav-link {
+            white-space: nowrap;
+            margin-right: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
         .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-gradient);
+            transform: scale(1.05);
         }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
         .table-hover tbody tr:hover {
             background-color: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--secondary-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 15px;
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 0.5rem;
+            }
+
+            .dashboard-header {
+                padding: 1.5rem 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                min-height: 100px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .nav-pills {
+                margin-bottom: 1rem;
+                padding: 0 0.5rem;
+            }
+
+            .nav-pills .nav-link {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+
+            .btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
+
+            .btn-group-mobile {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stat-number {
+                font-size: 1.8rem;
+            }
+
+            .chart-container {
+                height: 200px;
+            }
+
+            .table {
+                font-size: 0.75rem;
+            }
+
+            .card-header {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Improve scrollbar appearance */
+        .nav-pills::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .nav-pills::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .nav-pills::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .nav-pills::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Loading animation for charts */
+        .chart-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Custom mobile table styling */
+        @media (max-width: 768px) {
+            .mobile-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .mobile-table {
+                min-width: 600px;
+            }
         }
     </style>
 </head>
 <body class="bg-light">
     <div class="container-fluid">
         <!-- Header -->
-        <div class="dashboard-header text-center">
+        <div class="dashboard-header">
             <h1>📊 Dashboard de Control de Ganado</h1>
             <p class="mb-0">Análisis completo de tu operación ganadera</p>
         </div>
 
         <!-- Navegación -->
-        <div class="row mb-4">
+        <div class="row mb-3">
             <div class="col-12">
-                <a href="index.php" class="btn btn-secondary">⬅️ Volver al Sistema</a>
-                <a href="historial.php" class="btn btn-info">📜 Historial</a>
-                <a href="agregar_cria.php" class="btn btn-success">➕ Agregar Cría</a>
+                <div class="btn-group-mobile d-md-block">
+                    <a href="index.php" class="btn btn-secondary">⬅️ Volver al Sistema</a>
+                    <a href="historial.php" class="btn btn-info">📜 Historial</a>
+                    <a href="agregar_cria.php" class="btn btn-success">➕ Agregar Cría</a>
+                </div>
             </div>
         </div>
 
         <!-- Estadísticas Principales -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="stat-card text-center">
                     <div class="stat-number"><?= $statsGenerales['crias_activas'] ?? 0 ?></div>
-                    <div>🐮 Crías Activas</div>
+                    <div class="stat-label">🐮 Crías Activas</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="stat-card text-center">
                     <div class="stat-number"><?= $statsGenerales['ventas_año'] ?? 0 ?></div>
-                    <div>💰 Ventas <?= $anioActual ?></div>
+                    <div class="stat-label">💰 Ventas <?= $anioActual ?></div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="stat-card text-center">
                     <div class="stat-number">$<?= number_format($statsGenerales['ganancia_año'] ?? 0, 0) ?></div>
-                    <div>📈 Ganancia Anual</div>
+                    <div class="stat-label">📈 Ganancia Anual</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="stat-card text-center">
                     <div class="stat-number">$<?= number_format($statsGenerales['ganancia_promedio'] ?? 0, 0) ?></div>
-                    <div>⭐ Ganancia Promedio</div>
+                    <div class="stat-label">⭐ Ganancia Promedio</div>
                 </div>
             </div>
         </div>
@@ -227,10 +468,10 @@ while($row = $edadResult->fetch_assoc()) {
             <!-- Tab Ganancias -->
             <div class="tab-pane fade show active" id="ganancias" role="tabpanel">
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-12 col-lg-8 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>📈 Ganancias por Mes (Últimos 12 meses)</h5>
+                                <h5 class="mb-0">📈 Ganancias por Mes (Últimos 12 meses)</h5>
                             </div>
                             <div class="card-body">
                                 <div class="chart-container">
@@ -239,10 +480,10 @@ while($row = $edadResult->fetch_assoc()) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-lg-4 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>🐂🐄 Distribución por Sexo</h5>
+                                <h5 class="mb-0">🐂🐄 Distribución por Sexo</h5>
                             </div>
                             <div class="card-body">
                                 <div class="chart-container">
@@ -257,10 +498,10 @@ while($row = $edadResult->fetch_assoc()) {
             <!-- Tab Inventario -->
             <div class="tab-pane fade" id="inventario" role="tabpanel">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-12 col-lg-6 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>⏰ Crías por Tiempo en Inventario</h5>
+                                <h5 class="mb-0">⏰ Crías por Tiempo en Inventario</h5>
                             </div>
                             <div class="card-body">
                                 <div class="chart-container">
@@ -269,10 +510,10 @@ while($row = $edadResult->fetch_assoc()) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-12 col-lg-6 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>🚨 Alertas de Inventario</h5>
+                                <h5 class="mb-0">🚨 Alertas de Inventario</h5>
                             </div>
                             <div class="card-body">
                                 <?php
@@ -307,9 +548,9 @@ while($row = $edadResult->fetch_assoc()) {
                                     $rangoStats[$rango]++;
                                 }
                                 ?>
-                                <ul class="list-group">
+                                <ul class="list-group list-group-flush">
                                     <?php foreach($rangoStats as $rango => $count): ?>
-                                        <li class="list-group-item d-flex justify-content-between">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <span><?= $rango ?></span>
                                             <span class="badge bg-primary"><?= $count ?></span>
                                         </li>
@@ -324,10 +565,10 @@ while($row = $edadResult->fetch_assoc()) {
             <!-- Tab Análisis -->
             <div class="tab-pane fade" id="analisis" role="tabpanel">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>⚖️ Análisis de Ganancia de Peso (Últimos 6 meses)</h5>
+                                <h5 class="mb-0">⚖️ Análisis de Ganancia de Peso (Últimos 6 meses)</h5>
                             </div>
                             <div class="card-body">
                                 <div class="chart-container">
@@ -338,28 +579,27 @@ while($row = $edadResult->fetch_assoc()) {
                     </div>
                 </div>
                 
-                <div class="row mt-4">
-                    <div class="col-md-6">
+                <div class="row">
+                    <div class="col-12 col-lg-6 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>📊 Métricas de Rendimiento</h5>
+                                <h5 class="mb-0">📊 Métricas de Rendimiento</h5>
                             </div>
                             <div class="card-body">
                                 <?php
                                 $pesoPromedio = array_sum(array_column($pesoData, 'diferencia_kg')) / max(count($pesoData), 1);
                                 $mejorGanancia = max(array_column($pesoData, 'diferencia_kg'));
-                                $tiempoPromedio = 0; // Calcular después
                                 ?>
                                 <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex justify-content-between">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>📈 Ganancia promedio de peso:</span>
                                         <strong><?= number_format($pesoPromedio, 2) ?> kg</strong>
                                     </li>
-                                    <li class="list-group-item d-flex justify-content-between">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>🏆 Mejor ganancia de peso:</span>
                                         <strong><?= number_format($mejorGanancia, 2) ?> kg</strong>
                                     </li>
-                                    <li class="list-group-item d-flex justify-content-between">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>💰 Ganancia promedio por venta:</span>
                                         <strong>$<?= number_format($statsGenerales['ganancia_promedio'] ?? 0, 2) ?></strong>
                                     </li>
@@ -367,10 +607,10 @@ while($row = $edadResult->fetch_assoc()) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-12 col-lg-6 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5>🎯 Recomendaciones</h5>
+                                <h5 class="mb-0">🎯 Recomendaciones</h5>
                             </div>
                             <div class="card-body">
                                 <div class="alert alert-info">
@@ -403,44 +643,46 @@ while($row = $edadResult->fetch_assoc()) {
             <div class="tab-pane fade" id="ranking" role="tabpanel">
                 <div class="card">
                     <div class="card-header">
-                        <h5>🏆 Top 10 Mejores Ventas</h5>
+                        <h5 class="mb-0">🏆 Top 10 Mejores Ventas</h5>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>🏅 Posición</th>
-                                        <th>Arete</th>
-                                        <th>Ganancia</th>
-                                        <th>Peso Venta</th>
-                                        <th>Total Venta</th>
-                                        <th>Fecha</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach($topVentas as $index => $venta): ?>
+                        <div class="mobile-table-wrapper">
+                            <div class="table-responsive">
+                                <table class="table table-hover mobile-table">
+                                    <thead class="table-dark">
                                         <tr>
-                                            <td>
-                                                <?php if ($index == 0): ?>
-                                                    <span class="badge bg-warning">🥇 1°</span>
-                                                <?php elseif ($index == 1): ?>
-                                                    <span class="badge bg-secondary">🥈 2°</span>
-                                                <?php elseif ($index == 2): ?>
-                                                    <span class="badge bg-warning" style="background-color: #cd7f32 !important;">🥉 3°</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-primary"><?= $index + 1 ?>°</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td><strong><?= $venta['arete'] ?></strong></td>
-                                            <td class="text-success"><strong>$<?= number_format($venta['total_ganancia'], 2) ?></strong></td>
-                                            <td><?= $venta['kg_venta'] ?> kg</td>
-                                            <td>$<?= number_format($venta['venta'], 2) ?></td>
-                                            <td><?= date('d/m/Y', strtotime($venta['fecha_venta'])) ?></td>
+                                            <th>🏅 Pos</th>
+                                            <th>Arete</th>
+                                            <th>Ganancia</th>
+                                            <th>Peso</th>
+                                            <th class="d-none d-md-table-cell">Total Venta</th>
+                                            <th class="d-none d-md-table-cell">Fecha</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach($topVentas as $index => $venta): ?>
+                                            <tr>
+                                                <td>
+                                                    <?php if ($index == 0): ?>
+                                                        <span class="badge bg-warning">🥇 1°</span>
+                                                    <?php elseif ($index == 1): ?>
+                                                        <span class="badge bg-secondary">🥈 2°</span>
+                                                    <?php elseif ($index == 2): ?>
+                                                        <span class="badge bg-warning" style="background-color: #cd7f32 !important;">🥉 3°</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-primary"><?= $index + 1 ?>°</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><strong><?= $venta['arete'] ?></strong></td>
+                                                <td class="text-success"><strong>$<?= number_format($venta['total_ganancia'], 0) ?></strong></td>
+                                                <td><?= $venta['kg_venta'] ?> kg</td>
+                                                <td class="d-none d-md-table-cell">$<?= number_format($venta['venta'], 0) ?></td>
+                                                <td class="d-none d-md-table-cell"><?= date('d/m/Y', strtotime($venta['fecha_venta'])) ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -453,6 +695,24 @@ while($row = $edadResult->fetch_assoc()) {
         // Configuración general de Chart.js
         Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
         Chart.defaults.color = '#333';
+
+        // Configuración responsive para gráficos
+        const responsiveOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: window.innerWidth < 768 ? 'bottom' : 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
+                }
+            }
+        };
 
         // 1. Gráfica de Ganancias por Mes
         const gananciasCtx = document.getElementById('gananciasChart').getContext('2d');
@@ -477,8 +737,7 @@ while($row = $edadResult->fetch_assoc()) {
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                ...responsiveOptions,
                 scales: {
                     y: {
                         type: 'linear',
@@ -486,7 +745,15 @@ while($row = $edadResult->fetch_assoc()) {
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Ganancias ($)'
+                            text: 'Ganancias ($)',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
                         }
                     },
                     y1: {
@@ -495,17 +762,37 @@ while($row = $edadResult->fetch_assoc()) {
                         position: 'right',
                         title: {
                             display: true,
-                            text: 'Número de Ventas'
+                            text: 'Número de Ventas',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
                         },
                         grid: {
                             drawOnChartArea: false,
                         },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            },
+                            maxRotation: window.innerWidth < 768 ? 45 : 0
+                        }
                     }
                 },
                 plugins: {
+                    ...responsiveOptions.plugins,
                     title: {
                         display: true,
-                        text: 'Evolución Mensual de Ganancias y Ventas'
+                        text: 'Evolución Mensual de Ganancias y Ventas',
+                        font: {
+                            size: window.innerWidth < 768 ? 12 : 14
+                        }
                     }
                 }
             }
@@ -542,11 +829,18 @@ while($row = $edadResult->fetch_assoc()) {
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                ...responsiveOptions,
                 plugins: {
+                    ...responsiveOptions.plugins,
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 10,
+                            font: {
+                                size: window.innerWidth < 768 ? 9 : 11
+                            }
+                        }
                     }
                 }
             }
@@ -564,30 +858,49 @@ while($row = $edadResult->fetch_assoc()) {
                     }, $pesoData)) ?>,
                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
                     borderColor: 'rgba(54, 162, 235, 1)',
-                    pointRadius: 6
+                    pointRadius: window.innerWidth < 768 ? 4 : 6
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                ...responsiveOptions,
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Peso de Compra (kg)'
+                            text: 'Peso de Compra (kg)',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
                         }
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Ganancia de Peso (kg)'
+                            text: 'Ganancia de Peso (kg)',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
                         }
                     }
                 },
                 plugins: {
+                    ...responsiveOptions.plugins,
                     title: {
                         display: true,
-                        text: 'Relación entre Peso de Compra y Ganancia de Peso'
+                        text: 'Relación entre Peso de Compra y Ganancia de Peso',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 13
+                        }
                     }
                 }
             }
@@ -622,24 +935,146 @@ while($row = $edadResult->fetch_assoc()) {
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                ...responsiveOptions,
                 scales: {
                     y: {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Número de Crías'
+                            text: 'Número de Crías',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            },
+                            maxRotation: window.innerWidth < 768 ? 45 : 0
                         }
                     }
                 },
                 plugins: {
+                    ...responsiveOptions.plugins,
                     title: {
                         display: true,
-                        text: 'Distribución de Crías por Tiempo en Inventario'
+                        text: 'Distribución de Crías por Tiempo en Inventario',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 13
+                        }
                     }
                 }
             }
+        });
+
+        // Función para redimensionar gráficos cuando cambia el tamaño de ventana
+        function resizeCharts() {
+            setTimeout(() => {
+                gananciasChart.resize();
+                sexoChart.resize();
+                pesoChart.resize();
+                edadChart.resize();
+            }, 100);
+        }
+
+        // Event listener para redimensionamiento
+        window.addEventListener('resize', resizeCharts);
+
+        // Inicializar tooltips de Bootstrap si existen
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Scroll suave para navegación en tablets
+        document.querySelectorAll('.nav-pills .nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                // Pequeño delay para permitir que el tab se active
+                setTimeout(() => {
+                    const targetPane = document.querySelector(this.getAttribute('data-bs-target'));
+                    if (targetPane && window.innerWidth >= 768 && window.innerWidth < 1200) {
+                        targetPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 150);
+            });
+        });
+
+        // Mejorar la experiencia en dispositivos táctiles
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+            
+            // Añadir estilo adicional para dispositivos táctiles
+            const touchStyles = `
+                <style>
+                    .touch-device .stat-card:hover {
+                        transform: none;
+                    }
+                    
+                    .touch-device .btn:hover {
+                        transform: none;
+                    }
+                    
+                    .touch-device .table-hover tbody tr:hover {
+                        transform: none;
+                    }
+                    
+                    .touch-device .stat-card:active,
+                    .touch-device .btn:active {
+                        transform: scale(0.98);
+                        transition: transform 0.1s ease;
+                    }
+                </style>
+            `;
+            document.head.insertAdjacentHTML('beforeend', touchStyles);
+        }
+
+        // Función para optimizar rendimiento en dispositivos móviles
+        function optimizeForMobile() {
+            if (window.innerWidth < 768) {
+                // Reducir la frecuencia de actualización de gráficos en móviles
+                Chart.defaults.animation.duration = 800;
+                
+                // Simplificar las animaciones en móviles
+                [gananciasChart, sexoChart, pesoChart, edadChart].forEach(chart => {
+                    if (chart) {
+                        chart.options.animation = {
+                            duration: 600,
+                            easing: 'easeOutQuart'
+                        };
+                    }
+                });
+            }
+        }
+
+        // Ejecutar optimización al cargar
+        optimizeForMobile();
+
+        // Reoptimizar cuando cambie el tamaño de ventana
+        window.addEventListener('resize', optimizeForMobile);
+
+        // Lazy loading para gráficos (mejorar rendimiento inicial)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const chartCanvas = entry.target.querySelector('canvas');
+                    if (chartCanvas && !chartCanvas.classList.contains('loaded')) {
+                        chartCanvas.classList.add('loaded');
+                        // Aquí podrías cargar datos adicionales si fuera necesario
+                    }
+                }
+            });
+        });
+
+        // Observar todas las tarjetas de gráficos
+        document.querySelectorAll('.chart-container').forEach(container => {
+            observer.observe(container);
         });
     </script>
 </body>
