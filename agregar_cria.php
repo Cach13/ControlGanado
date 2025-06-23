@@ -300,9 +300,9 @@
 
         <!-- Botones de navegación responsive -->
         <div class="mb-4 d-flex flex-wrap gap-2">
-            <a href="#" class="btn btn-secondary">⬅️ Volver al Inicio</a>
-            <a href="#" class="btn btn-primary">📊 Dashboard</a>
-            <a href="#" class="btn btn-info">📜 Historial</a>
+            <a href="index.php" class="btn btn-secondary">⬅️ Volver al Inicio</a>
+            <a href="dashboard.php" class="btn btn-primary">📊 Dashboard</a>
+            <a href="historial.php" class="btn btn-info">📜 Historial</a>
         </div>
 
         <div class="row g-4">
