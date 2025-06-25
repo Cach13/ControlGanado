@@ -313,7 +313,7 @@
                         <h5 class="mb-0">📋 Datos de la Cría</h5>
                     </div>
                     <div class="card-body">
-                        <form id="criaForm">
+                        <form action="procesar_agregar.php" method="POST" id="criaForm">
                             <!-- Grid responsive para campos -->
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -466,41 +466,44 @@
 
         // Validación del formulario
         document.getElementById('criaForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
             const arete = document.getElementById('arete').value.trim();
             const sexo = document.getElementById('sexo').value;
             const kg = parseFloat(document.getElementById('kg_compra').value);
             const precio = parseFloat(document.getElementById('precio_compra').value);
             const fecha = document.getElementById('fecha_compra').value;
 
-            // Validaciones
+            // Validaciones antes de enviar
             if (!arete) {
-                mostrarAlerta('❌ El número de arete es obligatorio', 'danger');
+                alert('❌ El número de arete es obligatorio');
+                e.preventDefault();
                 return;
             }
 
             if (!sexo) {
-                mostrarAlerta('❌ Debes seleccionar el sexo del animal', 'danger');
+                alert('❌ Debes seleccionar el sexo del animal');
+                e.preventDefault();
                 return;
             }
 
             if (kg <= 0) {
-                mostrarAlerta('❌ El peso debe ser mayor a 0', 'danger');
+                alert('❌ El peso debe ser mayor a 0');
+                e.preventDefault();
                 return;
             }
 
             if (precio <= 0) {
-                mostrarAlerta('❌ El precio debe ser mayor a 0', 'danger');
+                alert('❌ El precio debe ser mayor a 0');
+                e.preventDefault();
                 return;
             }
 
             if (!fecha) {
-                mostrarAlerta('❌ La fecha de compra es obligatoria', 'danger');
+                alert('❌ La fecha de compra es obligatoria');
+                e.preventDefault();
                 return;
             }
 
-            // Confirmación final
+            // Confirmación final antes de enviar al servidor
             const total = kg * precio;
             const sexoTexto = sexo === 'M' ? '🐂 Macho' : '🐄 Hembra';
             
@@ -510,54 +513,26 @@
 • Arete: ${arete}
 • Sexo: ${sexoTexto}
 • Peso: ${kg} kg
-• Precio: $${precio.toFixed(2)}
+• Precio: ${precio.toFixed(2)}
 • Fecha: ${fecha}
-• Total: $${total.toFixed(2)}`;
+• Total: ${total.toFixed(2)}`;
 
-            if (confirm(mensaje)) {
-                // Simular envío exitoso
-                mostrarAlerta('✅ Cría registrada exitosamente', 'success');
-                
-                // Limpiar formulario después de 2 segundos
-                setTimeout(() => {
-                    document.getElementById('criaForm').reset();
-                    document.getElementById('fecha_compra').value = new Date().toISOString().split('T')[0];
-                    calcularTotal();
-                }, 2000);
+            if (!confirm(mensaje)) {
+                e.preventDefault();
             }
+            // Si el usuario confirma, el formulario se enviará normalmente al servidor
         });
 
-        // Función para mostrar alertas
+        // Función para mostrar alertas (mantener para validaciones)
         function mostrarAlerta(mensaje, tipo) {
-            const alertaExistente = document.querySelector('.alert');
-            if (alertaExistente) {
-                alertaExistente.remove();
-            }
-
-            const alerta = document.createElement('div');
-            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
-            alerta.innerHTML = `
-                ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-
-            document.querySelector('.container').insertBefore(alerta, document.querySelector('.row'));
-
-            // Auto-cerrar después de 5 segundos
-            setTimeout(() => {
-                if (alerta.parentNode) {
-                    alerta.remove();
-                }
-            }, 5000);
+            // Solo se usa para validaciones, no para simulación
+            alert(mensaje);
         }
 
         // Función cancelar
         function cancelar() {
             if (confirm('¿Estás seguro de que quieres cancelar? Se perderán los datos ingresados.')) {
-                document.getElementById('criaForm').reset();
-                document.getElementById('fecha_compra').value = new Date().toISOString().split('T')[0];
-                calcularTotal();
-                mostrarAlerta('ℹ️ Formulario cancelado', 'info');
+                window.location.href = 'index.php';
             }
         }
 

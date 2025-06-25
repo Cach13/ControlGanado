@@ -33,3 +33,23 @@ CREATE TABLE ventas (
     total_ganancia DECIMAL(10,2),
     fecha_venta DATE DEFAULT CURRENT_DATE
 );
+
+-- Nueva tabla para control de costos
+CREATE TABLE costos_ganaderos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion VARCHAR(255) NOT NULL,
+    monto DECIMAL(10,2) NOT NULL,
+    categoria ENUM('alimenticio', 'salud', 'general') NOT NULL,
+    fecha DATE NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+-- Insertar algunos datos de ejemplo
+INSERT INTO costos_ganaderos (descripcion, monto, categoria, fecha) VALUES
+('Compra de alimento balanceado', 2500.00, 'alimenticio', '2024-01-15'),
+('Vacunación contra fiebre aftosa', 800.00, 'salud', '2024-01-18'),
+('Reparación de cercas', 1200.00, 'general', '2024-01-20'),
+('Suplementos vitamínicos', 450.00, 'alimenticio', '2024-01-22'),
+('Consulta veterinaria', 300.00, 'salud', '2024-01-25'),
+('Mantenimiento de bebederos', 600.00, 'general', '2024-01-28');

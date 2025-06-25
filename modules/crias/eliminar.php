@@ -1,5 +1,5 @@
 <?php
-require_once 'bd.php';
+require_once 'config/bd.php';
 
 // Verificar que se recibió el parámetro arete
 if (!isset($_GET['arete']) || empty($_GET['arete'])) {

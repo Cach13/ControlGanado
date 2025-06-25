@@ -1,5 +1,5 @@
 <?php
-require_once 'bd.php';
+require_once 'config/bd.php';
 
 $sql = "SELECT * FROM ventas ORDER BY fecha_venta DESC";
 $resultado = $conn->query($sql);

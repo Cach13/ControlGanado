@@ -1,5 +1,5 @@
 <?php
-require_once 'bd.php';
+require_once 'config/bd.php';
 
 // Verificar que los datos lleguen por POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

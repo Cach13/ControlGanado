@@ -1,5 +1,5 @@
 <?php
-require_once 'bd.php';
+require_once 'config/bd.php';
 
 // Obtener datos para el dashboard
 $anioActual = date('Y');

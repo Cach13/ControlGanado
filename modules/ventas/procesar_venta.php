@@ -1,5 +1,5 @@
 <?php
-require_once 'bd.php';
+require_once 'config/bd.php';
 
 // Recibir datos
 $arete = $_POST['arete'];

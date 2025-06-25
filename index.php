@@ -1,5 +1,6 @@
 <?php
-require_once 'bd.php';
+require_once 'config/bd.php';
+
 
 // Filtros
 $filtroSexo = $_GET['sexo'] ?? '';
