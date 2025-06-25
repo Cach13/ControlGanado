@@ -44,7 +44,7 @@ $gananciaAnual = $conn->query("SELECT SUM(total_ganancia) AS total FROM ventas W
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient: linear-gradient(135deg,rgb(40, 65, 177) 0%,rgb(50, 19, 80) 100%);
             --secondary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             --success-color: #28a745;
             --warning-color: #ffc107;
@@ -522,16 +522,10 @@ $gananciaAnual = $conn->query("SELECT SUM(total_ganancia) AS total FROM ventas W
             <div class="row">
                 <div class="col-md-12">
                     <div class="btn-group-mobile">
-                        <a href="dashboard.php" class="btn btn-custom btn-dashboard">
-                            <i class="fas fa-chart-bar"></i> Panel de Control
-                        </a>
-                        <a href="agregar_cria.php" class="btn btn-custom btn-add">
-                            <i class="fas fa-plus"></i> Agregar Nueva Cría
-                        </a>
-                        <a href="historial.php" class="btn btn-custom btn-history">
-                            <i class="fas fa-history"></i> Historial de Ventas
-                        </a>
-                        <a href="reportes.php" class="btn btn-custom btn-info">
+                        <a href="/modules/dashboard/dashboard.php" class="btn btn-primary">📊 Dashboard</a>
+                        <a href="/modules/crias/agregar_cria.php" class="btn btn-success">➕ Agregar Cría</a>
+                        <a href="/modules/ventas/historial.php" class="btn btn-info">📜 Historial</a>
+                        <a href="/modules/costos/costos.php" class="btn btn-warning">💰 Costos</a>
                             <i class="fas fa-file-alt"></i> Generar Reportes
                         </a>
                     </div>
@@ -615,11 +609,11 @@ $gananciaAnual = $conn->query("SELECT SUM(total_ganancia) AS total FROM ventas W
                             <td><?= date('d/m/Y', strtotime($row['fecha_compra'])) ?></td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="venta.php?arete=<?= urlencode($row['arete']) ?>" class="btn btn-sell btn-sm">
+                                    <a href="/modules/ventas/venta.php urlencode($row['arete']) ?>" class="btn btn-sell btn-sm">
                                         <i class="fas fa-hand-holding-usd"></i> Vender
                                     </a>
-                                    <a href="editar_cria.php?arete=<?= urlencode($row['arete']) ?>" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-edit"></i>
+                                    <a href="/modules/crias/eliminar.php urlencode($row['arete']) ?>" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-trash-alt"></i> Eliminar
                                     </a>
                                 </div>
                             </td>

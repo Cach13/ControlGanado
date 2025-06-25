@@ -1,5 +1,5 @@
 <?php
-require_once 'config/bd.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config/bd.php';
 
 $sql = "SELECT * FROM ventas ORDER BY fecha_venta DESC";
 $resultado = $conn->query($sql);
@@ -299,7 +299,7 @@ $resultado = $conn->query($sql);
         </div>
 
         <!-- Back Button -->
-        <a href="index.php" class="btn btn-secondary">
+        <a href="/index.php" class="btn btn-secondary">
             ⬅️ Volver al inicio
         </a>
 

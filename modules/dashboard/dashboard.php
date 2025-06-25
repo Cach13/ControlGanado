@@ -1,5 +1,5 @@
 <?php
-require_once 'config/bd.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config/bd.php';
 
 // Obtener datos para el dashboard
 $anioActual = date('Y');
@@ -121,7 +121,7 @@ while($row = $edadResult->fetch_assoc()) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient: linear-gradient(135deg,rgb(40, 65, 177) 0%,rgb(50, 19, 80) 100%);
             --secondary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             --success-color: #28a745;
             --warning-color: #ffc107;
@@ -405,9 +405,10 @@ while($row = $edadResult->fetch_assoc()) {
         <div class="row mb-3">
             <div class="col-12">
                 <div class="btn-group-mobile d-md-block">
-                    <a href="index.php" class="btn btn-secondary">⬅️ Volver al Sistema</a>
-                    <a href="historial.php" class="btn btn-info">📜 Historial</a>
-                    <a href="agregar_cria.php" class="btn btn-success">➕ Agregar Cría</a>
+                    <a href="/index.php" class="btn btn-secondary">⬅️ Volver al Inicio</a>
+                    <a href="/modules/crias/agregar_cria.php" class="btn btn-success">➕ Agregar Cría</a>
+                    <a href="modules/ventas/historial.php" class="btn btn-info">📜 Historial</a>
+                    
                 </div>
             </div>
         </div>
@@ -690,11 +691,41 @@ while($row = $edadResult->fetch_assoc()) {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Configuración general de Chart.js
         Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
         Chart.defaults.color = '#333';
+        
+        // Configuración global de tooltips
+        Chart.defaults.plugins.tooltip = {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleFont: {
+                size: 14,
+                weight: 'bold'
+            },
+            bodyFont: {
+                size: 12
+            },
+            footerFont: {
+                size: 10
+            },
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    if (context.parsed.y !== undefined) {
+                        label += context.parsed.y.toLocaleString();
+                    }
+                    return label;
+                }
+            }
+        };
 
         // Configuración responsive para gráficos
         const responsiveOptions = {
@@ -714,7 +745,7 @@ while($row = $edadResult->fetch_assoc()) {
             }
         };
 
-        // 1. Gráfica de Ganancias por Mes
+        // 1. Gráfica de Ganancias por Mes (Mejorada con línea de tendencia)
         const gananciasCtx = document.getElementById('gananciasChart').getContext('2d');
         const gananciasChart = new Chart(gananciasCtx, {
             type: 'line',
@@ -726,7 +757,8 @@ while($row = $edadResult->fetch_assoc()) {
                     borderColor: 'rgb(75, 192, 192)',
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    yAxisID: 'y'
                 }, {
                     label: 'Número de Ventas',
                     data: <?= json_encode(array_column($gananciasData, 'ventas')) ?>,
@@ -734,6 +766,18 @@ while($row = $edadResult->fetch_assoc()) {
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     tension: 0.4,
                     yAxisID: 'y1'
+                }, {
+                    label: 'Tendencia Ganancias',
+                    data: <?= json_encode(array_column($gananciasData, 'ganancia')) ?>,
+                    type: 'line',
+                    borderColor: 'rgb(75, 192, 192)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    yAxisID: 'y',
+                    tension: 0.1
                 }]
             },
             options: {
@@ -753,6 +797,9 @@ while($row = $edadResult->fetch_assoc()) {
                         ticks: {
                             font: {
                                 size: window.innerWidth < 768 ? 8 : 10
+                            },
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
                             }
                         }
                     },
@@ -793,16 +840,30 @@ while($row = $edadResult->fetch_assoc()) {
                         font: {
                             size: window.innerWidth < 768 ? 12 : 14
                         }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const index = context[0].dataIndex;
+                                const ganancia = context[0].raw;
+                                const ventas = context[1].raw;
+                                const promedio = ganancia / ventas;
+                                return [
+                                    `Promedio por venta: $${promedio.toLocaleString('es-MX', {maximumFractionDigits: 2})}`,
+                                    `Total: $${ganancia.toLocaleString('es-MX')}`
+                                ];
+                            }
+                        }
                     }
                 }
             }
         });
 
-        // 2. Gráfica de Distribución por Sexo
+        // 2. Gráfica de Distribución por Sexo (Mejorada a barras agrupadas)
         const sexoCtx = document.getElementById('sexoChart').getContext('2d');
         const sexoData = <?= json_encode($sexoData) ?>;
         
-        // Procesar datos para el gráfico de dona
+        // Procesar datos para el gráfico de barras agrupadas
         let activasM = 0, activasH = 0, vendidasM = 0, vendidasH = 0;
         sexoData.forEach(item => {
             if (item.tipo === 'Activas') {
@@ -815,59 +876,34 @@ while($row = $edadResult->fetch_assoc()) {
         });
 
         const sexoChart = new Chart(sexoCtx, {
-            type: 'doughnut',
+            type: 'bar',
             data: {
-                labels: ['🐂 Machos Activos', '🐄 Hembras Activas', '🐂 Machos Vendidos', '🐄 Hembras Vendidas'],
-                datasets: [{
-                    data: [activasM, activasH, vendidasM, vendidasH],
-                    backgroundColor: [
-                        '#36A2EB',
-                        '#FF6384',
-                        '#4BC0C0',
-                        '#FF9F40'
-                    ]
-                }]
-            },
-            options: {
-                ...responsiveOptions,
-                plugins: {
-                    ...responsiveOptions.plugins,
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 10,
-                            font: {
-                                size: window.innerWidth < 768 ? 9 : 11
-                            }
-                        }
+                labels: ['Machos', 'Hembras'],
+                datasets: [
+                    {
+                        label: 'Activos',
+                        data: [activasM, activasH],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Vendidos',
+                        data: [vendidasM, vendidasH],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
                     }
-                }
-            }
-        });
-
-        // 3. Gráfica de Ganancia de Peso
-        const pesoCtx = document.getElementById('pesoChart').getContext('2d');
-        const pesoChart = new Chart(pesoCtx, {
-            type: 'scatter',
-            data: {
-                datasets: [{
-                    label: 'Peso Compra vs Ganancia',
-                    data: <?= json_encode(array_map(function($item) {
-                        return ['x' => $item['kg_compra'], 'y' => $item['diferencia_kg']];
-                    }, $pesoData)) ?>,
-                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    pointRadius: window.innerWidth < 768 ? 4 : 6
-                }]
+                ]
             },
             options: {
                 ...responsiveOptions,
                 scales: {
-                    x: {
+                    y: {
+                        beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Peso de Compra (kg)',
+                            text: 'Cantidad',
                             font: {
                                 size: window.innerWidth < 768 ? 10 : 12
                             }
@@ -878,14 +914,7 @@ while($row = $edadResult->fetch_assoc()) {
                             }
                         }
                     },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Ganancia de Peso (kg)',
-                            font: {
-                                size: window.innerWidth < 768 ? 10 : 12
-                            }
-                        },
+                    x: {
                         ticks: {
                             font: {
                                 size: window.innerWidth < 768 ? 8 : 10
@@ -897,16 +926,122 @@ while($row = $edadResult->fetch_assoc()) {
                     ...responsiveOptions.plugins,
                     title: {
                         display: true,
-                        text: 'Relación entre Peso de Compra y Ganancia de Peso',
+                        text: 'Distribución por Sexo (Activos vs Vendidos)',
                         font: {
                             size: window.innerWidth < 768 ? 11 : 13
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            footer: function(context) {
+                                const dataset = context[0].dataset;
+                                const total = dataset.data.reduce((a, b) => a + b, 0);
+                                const porcentaje = ((context[0].raw / total) * 100).toFixed(1);
+                                return `${porcentaje}% del total ${dataset.label.toLowerCase()}`;
+                            }
                         }
                     }
                 }
             }
         });
 
-        // 4. Gráfica de Edad del Inventario
+        // 3. Gráfica de Evolución de Peso (Mejorada)
+        const evolucionPesoCtx = document.getElementById('pesoChart').getContext('2d');
+        const evolucionPesoChart = new Chart(evolucionPesoCtx, {
+            type: 'line',
+            data: {
+                labels: <?= json_encode(array_unique(array_column($pesoData, 'mes_venta'))) ?>,
+                datasets: [{
+                    label: 'Peso Promedio de Compra (kg)',
+                    data: <?= json_encode(array_values(array_reduce($pesoData, function($acc, $item) {
+                        $mes = $item['mes_venta'];
+                        if (!isset($acc[$mes])) {
+                            $acc[$mes] = ['sum' => 0, 'count' => 0];
+                        }
+                        $acc[$mes]['sum'] += $item['kg_compra'];
+                        $acc[$mes]['count']++;
+                        return $acc;
+                    }, []))) ?>.map(m => m.sum / m.count),
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4
+                }, {
+                    label: 'Peso Promedio de Venta (kg)',
+                    data: <?= json_encode(array_values(array_reduce($pesoData, function($acc, $item) {
+                        $mes = $item['mes_venta'];
+                        if (!isset($acc[$mes])) {
+                            $acc[$mes] = ['sum' => 0, 'count' => 0];
+                        }
+                        $acc[$mes]['sum'] += $item['kg_venta'];
+                        $acc[$mes]['count']++;
+                        return $acc;
+                    }, []))) ?>.map(m => m.sum / m.count),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4
+                }, {
+                    label: 'Ganancia Promedio de Peso (kg)',
+                    data: <?= json_encode(array_values(array_reduce($pesoData, function($acc, $item) {
+                        $mes = $item['mes_venta'];
+                        if (!isset($acc[$mes])) {
+                            $acc[$mes] = ['sum' => 0, 'count' => 0];
+                        }
+                        $acc[$mes]['sum'] += ($item['kg_venta'] - $item['kg_compra']);
+                        $acc[$mes]['count']++;
+                        return $acc;
+                    }, []))) ?>.map(m => m.sum / m.count),
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                ...responsiveOptions,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Peso (kg)',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    ...responsiveOptions.plugins,
+                    title: {
+                        display: true,
+                        text: 'Evolución de Peso (Compra vs Venta)',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 13
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw.toFixed(2)} kg`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 4. Gráfica de Edad del Inventario (Mejorada)
         const edadCtx = document.getElementById('edadChart').getContext('2d');
         const edadData = <?= json_encode($edadData) ?>;
         
@@ -931,7 +1066,15 @@ while($row = $edadResult->fetch_assoc()) {
                         '#FFCE56',
                         '#4BC0C0',
                         '#9966FF'
-                    ]
+                    ],
+                    borderColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ],
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -974,13 +1117,152 @@ while($row = $edadResult->fetch_assoc()) {
             }
         });
 
+        // 5. Nuevo Gráfico: Rendimiento por Mes
+        const rendimientoContainer = document.createElement('div');
+        rendimientoContainer.className = 'chart-container';
+        const rendimientoCanvas = document.createElement('canvas');
+        rendimientoCanvas.id = 'rendimientoChart';
+        rendimientoContainer.appendChild(rendimientoCanvas);
+        document.querySelector('#analisis .card-body').prepend(rendimientoContainer);
+
+        const rendimientoCtx = rendimientoCanvas.getContext('2d');
+        const rendimientoChart = new Chart(rendimientoCtx, {
+            type: 'bar',
+            data: {
+                labels: <?= json_encode(array_column($gananciasData, 'nombre_mes')) ?>,
+                datasets: [{
+                    label: 'Ganancia por kg vendido',
+                    data: <?= json_encode(array_map(function($item) {
+                        return $item['ventas'] > 0 ? ($item['ganancia'] / $item['ventas']) : 0;
+                    }, $gananciasData)) ?>,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...responsiveOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Ganancia por kg ($)',
+                            font: {
+                                size: window.innerWidth < 768 ? 10 : 12
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            },
+                            callback: function(value) {
+                                return '$' + value.toFixed(2);
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            },
+                            maxRotation: window.innerWidth < 768 ? 45 : 0
+                        }
+                    }
+                },
+                plugins: {
+                    ...responsiveOptions.plugins,
+                    title: {
+                        display: true,
+                        text: 'Rendimiento Mensual (Ganancia por kg vendido)',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 13
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `$${context.raw.toFixed(2)} por kg`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 6. Nuevo Gráfico: Tasa de Rotación (Radar)
+        const rotacionContainer = document.createElement('div');
+        rotacionContainer.className = 'chart-container';
+        const rotacionCanvas = document.createElement('canvas');
+        rotacionCanvas.id = 'rotacionChart';
+        rotacionContainer.appendChild(rotacionCanvas);
+        document.querySelector('#inventario .card-body').prepend(rotacionContainer);
+
+        const rotacionCtx = rotacionCanvas.getContext('2d');
+        const rotacionData = <?= json_encode($rangoStats) ?>;
+        const rotacionLabels = Object.keys(rotacionData);
+        const rotacionValues = Object.values(rotacionData);
+
+        const rotacionChart = new Chart(rotacionCtx, {
+            type: 'radar',
+            data: {
+                labels: rotacionLabels,
+                datasets: [{
+                    label: 'Crías en Inventario',
+                    data: rotacionValues,
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(255, 159, 64, 1)'
+                }]
+            },
+            options: {
+                ...responsiveOptions,
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: Math.max(...rotacionValues) * 1.2,
+                        ticks: {
+                            font: {
+                                size: window.innerWidth < 768 ? 8 : 10
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    ...responsiveOptions.plugins,
+                    title: {
+                        display: true,
+                        text: 'Distribución de Crías por Tiempo en Inventario',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 13
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw} crías`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         // Función para redimensionar gráficos cuando cambia el tamaño de ventana
         function resizeCharts() {
             setTimeout(() => {
                 gananciasChart.resize();
                 sexoChart.resize();
-                pesoChart.resize();
+                evolucionPesoChart.resize();
                 edadChart.resize();
+                rendimientoChart.resize();
+                rotacionChart.resize();
             }, 100);
         }
 
@@ -1042,7 +1324,7 @@ while($row = $edadResult->fetch_assoc()) {
                 Chart.defaults.animation.duration = 800;
                 
                 // Simplificar las animaciones en móviles
-                [gananciasChart, sexoChart, pesoChart, edadChart].forEach(chart => {
+                [gananciasChart, sexoChart, evolucionPesoChart, edadChart, rendimientoChart, rotacionChart].forEach(chart => {
                     if (chart) {
                         chart.options.animation = {
                             duration: 600,
@@ -1076,6 +1358,34 @@ while($row = $edadResult->fetch_assoc()) {
         document.querySelectorAll('.chart-container').forEach(container => {
             observer.observe(container);
         });
+
+        // Filtros interactivos
+        document.getElementById('rangoFechas').addEventListener('change', function() {
+            const meses = parseInt(this.value);
+            const customContainer = document.getElementById('customRangeContainer');
+            
+            if (isNaN(meses)) {
+                customContainer.classList.remove('d-none');
+            } else {
+                customContainer.classList.add('d-none');
+                actualizarGraficos(meses);
+            }
+        });
+
+        function actualizarGraficos(meses) {
+            // Aquí iría la lógica para actualizar los gráficos con los nuevos datos
+            // Podrías hacer una petición AJAX o filtrar los datos existentes
+            
+            console.log(`Actualizando gráficos para últimos ${meses} meses`);
+            // Ejemplo de actualización simple (en realidad necesitarías nuevos datos)
+            gananciasChart.data.labels = gananciasChart.data.labels.slice(-meses);
+            gananciasChart.data.datasets.forEach(dataset => {
+                dataset.data = dataset.data.slice(-meses);
+            });
+            gananciasChart.update();
+            
+            // Actualizar otros gráficos de manera similar...
+        }
     </script>
 </body>
 </html>

@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient: linear-gradient(135deg,rgb(40, 65, 177) 0%,rgb(50, 19, 80) 100%);
             --secondary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             --success-color: #28a745;
             --warning-color: #ffc107;
@@ -126,11 +126,11 @@
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, );
         }
 
         .btn-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+            background: linear-gradient(135deg, #17a2b8);
         }
 
         .form-control, .form-select {
@@ -300,9 +300,9 @@
 
         <!-- Botones de navegación responsive -->
         <div class="mb-4 d-flex flex-wrap gap-2">
-            <a href="index.php" class="btn btn-secondary">⬅️ Volver al Inicio</a>
-            <a href="dashboard.php" class="btn btn-primary">📊 Dashboard</a>
-            <a href="historial.php" class="btn btn-info">📜 Historial</a>
+            <a href="/index.php" class="btn btn-secondary">⬅️ Volver al Inicio</a>
+            <a href="/dashboard.php" class="btn btn-primary">📊 Dashboard</a>
+            <a href="/modules/ventas/historial.php" class="btn btn-info">📜 Historial</a>
         </div>
 
         <div class="row g-4">
